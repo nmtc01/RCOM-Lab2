@@ -1,6 +1,6 @@
 /* RCOM 2019/2020
  * Joao Campos and Nuno Cardoso
- * Client file
+ * Server file
  */
 
 #include <netinet/in.h>
@@ -14,7 +14,7 @@
 
 int open_socket(int domain, int type, int protocol);
 void get_address(struct sockaddr_in *server_addr);
-int connect_socket(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+int bind_socket(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 
 int main() {
 	// open socket
@@ -24,8 +24,12 @@ int main() {
   struct sockaddr_in server_addr;
   get_address(&server_addr);
 
-  // connect to socket
-  connect_socket(network_socket, (struct sockaddr*) &server_addr, sizeof(server_addr));
+  // bind address to socket
+  bind_socket(network_socket, (struct sockaddr*) &server_addr, sizeof(server_addr));
+
+  // listen and accept connections
+  listen(network_socket, 5);
+  int client_socket = accept(network_socket, NULL, NULL);
 
   // start of communication
   // use send()/recv() to send/receive data
@@ -39,7 +43,7 @@ int main() {
 int open_socket(int domain, int type, int protocol){
   int ret = socket(domain, type, protocol);
   if(ret < 0){
-    perror("Connect");
+    perror("Open");
     exit(1);
   }
   return ret;
@@ -52,10 +56,10 @@ void get_address(struct sockaddr_in *server_addr){
   server_addr->sin_addr.s_addr = inet_addr(SERVER_ADDR); /*32 bit Internet address network byte ordered*/
 }
 
-int connect_socket(int sockfd, const struct sockaddr *addr, socklen_t addrlen){
-  int ret = connect(sockfd, addr, addrlen);
+int bind_socket(int sockfd, const struct sockaddr *addr, socklen_t addrlen){
+  int ret = bind(sockfd, addr, addrlen);
   if(ret < 0){
-    perror("Connect");
+    perror("Bind");
     exit(1);
   }
   return ret;
