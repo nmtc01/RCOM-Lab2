@@ -5,21 +5,22 @@
 
 #include "client.h"
 
-int main() {
-	// open socket
-  int network_socket = open_socket(AF_INET, SOCK_STREAM, 0);
+int main(int argc , char *argv[]) {
+  int socket_fd;
+  char *filepath = (char*)malloc(MAX_STRING_SIZE);
+  char *username = (char*)malloc(MAX_STRING_SIZE);
+  char *password = (char*)malloc(MAX_STRING_SIZE);
 
-	// create socket address
-  struct sockaddr_in server_addr;
-  get_address(&server_addr);
-
-  // connect to socket
-  connect_socket(network_socket, (struct sockaddr*) &server_addr, sizeof(server_addr));
+  // separate arguments
+  get_args(argc, argv, filepath, username, password);
 
   // start of communication
-  clt_comm(network_socket);
+  start_connection(&socket_fd);
+
+  char buf[MAX_BUF_SIZE];
+  receive_msg(socket_fd, buf);
 
   // end of communication
-  close(network_socket);
+  close(socket_fd);
   exit(0);
 }

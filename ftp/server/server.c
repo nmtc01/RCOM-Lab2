@@ -33,6 +33,13 @@ int bind_socket(int sockfd, const struct sockaddr *addr, socklen_t addrlen){
 int srv_comm(int client_socket){
   // use send()/recv() to send/receive data
 
-  char msg[DATA_SIZE] = "Start of connection.";
+  char msg[MAX_BUF_SIZE] = "Start of connection.";
   send(client_socket, msg, sizeof(msg), 0);
+
+  /*  Plan:
+      1. receive request with username, password and file
+      2. send green light, start packet followed by file, followed by end packet
+         or send red light
+      3. close
+  */
 }

@@ -15,7 +15,7 @@
 #include <strings.h>
 
 #define SERVER_PORT 6000
-#define DATA_SIZE 256
+#define MAX_BUF_SIZE 256
 
 int open_socket(int domain, int type, int protocol);
 void get_address(struct sockaddr_in *server_addr);
