@@ -5,49 +5,33 @@
 
 #include "socket.h"
 
-int open_socket(int domain, int type, int protocol){
-  int ret = socket(domain, type, protocol);
-  if(ret < 0){
-    perror("Open");
-    exit(1);
-  }
-  return ret;
-}
-
-void get_address(struct sockaddr_in *server_addr){
-  bzero((char*)server_addr, sizeof(*server_addr));
-  server_addr->sin_family = AF_INET;
-  server_addr->sin_port = htons(SERVER_PORT);                         /*server TCP port must be network byte ordered */
-  server_addr->sin_addr.s_addr = inet_addr(SERVER_ADDR);               /*32 bit Internet address network byte ordered*/
-}
-
-int connect_socket(int socket_fd, const struct sockaddr *addr, socklen_t addrlen){
-  int ret = connect(socket_fd, addr, addrlen);
-  if(ret < 0){
-    perror("Connect");
-    exit(1);
-  }
-  return ret;
-}
-
-int receive_msg(int socket_fd, char *buf){
-  memset(buf, 0, MAX_BUF_SIZE);
-  int n = read(socket_fd, buf, MAX_BUF_SIZE);
-  if(n < 0){
-    printf("Error on receive msg.\n");
+int receive_msg(int socket_fd){
+  FILE* sock_file = fdopen(socket_fd, "r");
+  if(sock_file == NULL){
+    perror("receive");
     return -1;
   }
-  return n;
+
+  char buf[MAX_BUF_SIZE];
+  int n;
+
+  while (buf[3] != ' ') {
+    memset(buf, 0, MAX_BUF_SIZE);
+    if(fgets(buf, MAX_BUF_SIZE, sock_file) == NULL) break;
+    printf("%s", buf);
+  }
+
+  return 0;
 }
 
 int send_msg(int socket_fd, char *buf){
-  memset(buf, 0, MAX_BUF_SIZE);
   int n = write(socket_fd, buf, MAX_BUF_SIZE);
   if(n < 0){
     printf("Error on send msg.\n");
     return -1;
   }
-  return n;
+
+  return 0;
 }
 
 int receive_file(int socket_fd, char *filename, int *filesize){
