@@ -1,0 +1,7 @@
+Router and switch configurations saved on balcony 4
+Flash file: backupconfig
+
+To save configurations: copy running-config flash:backupconfig
+			backupconfig
+To load configurations: copy flash:backupconfig startup-config
+			startup-config
