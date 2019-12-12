@@ -13,16 +13,18 @@ int main(int argc , char *argv[]) {
   char pass[MAX_STRING_SIZE]; memset(pass, 0, MAX_STRING_SIZE);
   char host[MAX_STRING_SIZE]; memset(host, 0, MAX_STRING_SIZE);
   char path[MAX_STRING_SIZE]; memset(path, 0, MAX_STRING_SIZE);
-  char filename[MAX_STRING_SIZE]; memset(filename, 0, MAX_STRING_SIZE);
+  char file[MAX_STRING_SIZE]; memset(file, 0, MAX_STRING_SIZE);
+  char ip[MAX_STRING_SIZE];
   char buf[MAX_BUF_SIZE];
 
-  get_args(argv[1], user, pass, host, path);
-  get_filename(path, filename);
-  h = getip(host);
+  if(get_args(argv[1], user, pass, host, path, file)){
+    printf("Usage: %s ftp://[<user>:<password>@]<host>/<path>\n", argv[0]);
+    return -1;
+  }
 
-  if(!strlen(user)){
-    strcpy(user, "anonymous");
-    strcpy(pass, "");
+  if(getip(host, ip)){
+    printf("Error getting ip.\n");
+    return -1;
   }
 
   system("clear");
@@ -31,11 +33,11 @@ int main(int argc , char *argv[]) {
   printf(" * Pass: %*s *\n", (MAX_STRING_SIZE + 4), pass);
   printf(" * Host: %*s *\n", (MAX_STRING_SIZE + 4), host);
   printf(" * Path: %*s *\n", (MAX_STRING_SIZE + 4), path);
-  printf(" * File: %*s *\n", (MAX_STRING_SIZE + 4), filename);
-  printf(" * IP  : %*s *\n", (MAX_STRING_SIZE + 4), inet_ntoa(*((struct in_addr *)h->h_addr)));
+  printf(" * File: %*s *\n", (MAX_STRING_SIZE + 4), file);
+  printf(" * IP  : %*s *\n", (MAX_STRING_SIZE + 4), ip);
   printf(" ******************************************************\n\n\n");
 
-  start_connection(&socket_fd, inet_ntoa(*((struct in_addr *)h->h_addr)));
+  start_connection(&socket_fd, ip, SERVER_PORT);
 
   /* Receive opening message */
   if(receive_msg(socket_fd)){
@@ -56,14 +58,24 @@ int main(int argc , char *argv[]) {
   }
 
   /* Passive mode */
+  int pasv_sock_fd;
+  if(passive_mode(socket_fd, &pasv_sock_fd)){
+    printf("Error in pasv.\n");
+    return -1;
+  }
 
   /* Send filename */
+  if(send_filename(socket_fd, file)){
+    printf("Error in retr.\n");
+    return -1;
+  }
 
   /* Receive file */
-
+  receive_file(pasv_sock_fd, file);
 
   /* End of communication */
   close(socket_fd);
+  close(pasv_sock_fd);
 
   return 0;
 }
