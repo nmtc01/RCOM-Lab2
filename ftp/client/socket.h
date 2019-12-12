@@ -19,11 +19,13 @@
 #define SERVER_PORT 21                  // port of socket
 #define MAX_BUF_SIZE 512                // Max buffer size
 
-/* Receive small message from server */
+/* Receive messages from server */
 int receive_msg(int socket_fd);
+
+/* Receive messages from server into buf */
 int receive_msg_(int socket_fd, char* buf);
 
-/* Send message to server */
+/* Send messages to server */
 int send_msg(int socket_fd, char *msg);
 
 /* Receive file from server */

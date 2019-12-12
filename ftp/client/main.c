@@ -37,7 +37,9 @@ int main(int argc , char *argv[]) {
   printf(" * IP  : %*s *\n", (MAX_STRING_SIZE + 4), ip);
   printf(" ******************************************************\n\n\n");
 
-  start_connection(&socket_fd, ip, SERVER_PORT);
+  if(start_connection(&socket_fd, ip, SERVER_PORT)){
+    printf("Error connecting.\n");
+  }
 
   /* Receive opening message */
   if(receive_msg(socket_fd)){

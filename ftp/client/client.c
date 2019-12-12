@@ -6,13 +6,13 @@
 #include "client.h"
 
 int get_args(char *arg, char *user, char *pass, char *host, char *path, char* file){
-  // ftp://[<user>:<password>@]<host>/<path>
+  /* ftp://[<user>:<password>@]<host>/<path> */
 
   char* start = "ftp://";
   char* url = malloc(strlen(arg));
 
   strcpy(url, arg);
-  // Check start ftp://
+  /* Check start */
   if(strncmp(url, start, strlen(start))){
     printf("Invalid url.");
     return -1;
@@ -20,14 +20,14 @@ int get_args(char *arg, char *user, char *pass, char *host, char *path, char* fi
   url += strlen(start);
 
   if(strchr(url, ':') != NULL){
-    // Read username
+    /* Read username */
     while (*url != ':') {
       strncat(user, url, 1);
       url++;
     }
     url++;
 
-    // Read password
+    /* Read password */
     while (*url != '@') {
       strncat(pass, url, 1);
       url++;
@@ -38,58 +38,53 @@ int get_args(char *arg, char *user, char *pass, char *host, char *path, char* fi
     strcpy(pass, "");
   }
 
-  // Read host
+  /* Read host */
   while (*url != '/') {
     strncat(host, url, 1);
     url++;
   }
   url++;
 
-  // Read path
+  /* Read path */
   strncpy(path, url, strrchr(url, '/')-url);
 
-  // Read filename
+  /* Read filename */
   strcpy(file, strrchr(url, '/')+1);
 
   return 0;
 }
 
-int get_filename(char* path, char *filename){
-  char* file_name = basename(path);
-  strcpy(filename, file_name);
-  return 0;
-}
-
 int getip(char* host, char* ip){
   host_t *h;
+  /* Get host struct */
   if((h = gethostbyname(host)) == NULL){
     perror("gethostbyname");
     return -1;
   }
-
+  /* Get ip from host */
   strcpy(ip, inet_ntoa(*((struct in_addr *)h->h_addr)));
 
   return 0;
 }
 
 int start_connection(int *socket_fd, char* ip, int port){
-  // open socket
+  /* Open socket */
   if((*socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-    perror("socket");
-    exit(2);
+    printf("Error with socket.\n");
+    return -1;
   }
 
-  // create socket address
+  /* Create socket address */
   struct sockaddr_in server_addr;
   bzero((char*)&server_addr, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
   server_addr.sin_addr.s_addr = inet_addr(ip);
   server_addr.sin_port = htons(port);
 
-  // connect to socket
+  /* Connect to socket */
   if(connect(*socket_fd, (struct sockaddr*) &server_addr, sizeof(server_addr)) < 0){
-    perror("connect");
-    exit(2);
+    printf("Error with connect.\n");
+    return -1;
   }
 
   printf("Connected %s:%d\r\n", ip, port);
@@ -175,15 +170,19 @@ int passive_mode(int socket_fd, int* pasv_sock_fd){
     return -1;
   }
 
+  /* Get passive ip and port */
   char pasv[1024];
   memset(pasv, 0, MAX_BUF_SIZE);
   int ip1,ip2,ip3,ip4,port1,port2,port;
   sscanf(res, "227 Entering Passive Mode (%d,%d,%d,%d,%d,%d)",&ip1,&ip2,&ip3,&ip4,&port1,&port2);
-
   sprintf(pasv, "%d.%d.%d.%d",ip1,ip2,ip3,ip4);
   port = port1 * 256 + port2;
 
-  start_connection(pasv_sock_fd, pasv, port);
+  /* Connect to passive socket */
+  if(start_connection(pasv_sock_fd, pasv, port)){
+    printf("Error connecting.\n");
+    return -1;
+  }
 
   return 0;
 }
@@ -192,7 +191,7 @@ int send_filename(int socket_fd, char* filename){
   char buf[MAX_BUF_SIZE];
   char res[MAX_BUF_SIZE];
 
-  /* Send cwd */
+  /* Send retr */
   memset(buf, 0, MAX_BUF_SIZE);
   sprintf(buf, "RETR %s\r\n", filename);
   printf("%s", buf);

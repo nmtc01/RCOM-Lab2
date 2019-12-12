@@ -12,13 +12,10 @@ typedef struct hostent host_t;
 /* Get info from url argument */
 int get_args(char *arg, char *user, char *pass, char *host, char *path, char* file);
 
-/* Get filename from path */
-int get_filename(char* path, char *filename);
-
 /* Get ip of given host */
 int getip(char* host, char* ip);
 
-/* Open socket and connect with IP */
+/* Open socket and connect with IP and port*/
 int start_connection(int *socket_fd, char* ip, int port);
 
 /* Login into server */
