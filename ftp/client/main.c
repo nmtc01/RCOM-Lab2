@@ -73,7 +73,10 @@ int main(int argc , char *argv[]) {
   }
 
   /* Receive file */
-  receive_file(pasv_sock_fd, file);
+  if(receive_file(pasv_sock_fd, file)){
+    printf("Error receiving file.\n");
+    return -1;
+  }
 
   /* End of communication */
   close(socket_fd);
