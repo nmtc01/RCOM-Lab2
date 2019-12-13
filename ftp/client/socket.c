@@ -86,7 +86,7 @@ int receive_file(int socket_fd, char *filename){
       perror("read()");
       return -1;
     }
-    write_bytes = write(file_fd, data, MAX_BUF_SIZE);
+    write_bytes = write(file_fd, data, read_bytes);
     if(write_bytes < 0){
       perror("write()");
       return -1;
