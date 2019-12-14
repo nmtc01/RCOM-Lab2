@@ -17,11 +17,11 @@ int receive_msg(int socket_fd){
   int n;
 
   /* Read line-by-line until find space in forth */
-  while (buf[3] != ' ') {
+  do {
     memset(buf, 0, MAX_BUF_SIZE);
     if(fgets(buf, MAX_BUF_SIZE, sock_file) == NULL) break;
     printf("%s", buf);
-  }
+  } while (buf[3] != ' ');
 
   /* In case of error */
   if(buf[0] < '1' || buf[0] >= '5'){
